@@ -1,5 +1,5 @@
 // channels_db.js
-import { client } from "../db/client.js";
+import { client } from "./db/client.js";
 
 // -----------------------------
 // GET CANDLES
