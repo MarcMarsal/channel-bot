@@ -1,1 +1,19 @@
-test
+{
+  "name": "channels-bot",
+  "version": "1.0.0",
+  "description": "FIAT‑NET Mean Reversion Channels Bot (1H)",
+  "type": "module",
+  "scripts": {
+    "channels": "node bot_channels.js",
+    "viewer": "node bot_channels_viewer.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "pg": "^8.11.0",
+    "node-cron": "^3.0.2",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
