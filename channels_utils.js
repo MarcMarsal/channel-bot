@@ -44,20 +44,18 @@ export function computeLevels(channel, currentTimestamp, marginPercent = 0.15) {
 // Detectar entrada FIAT‑NET (canal + marges)
 // ------------------------------------------------------
 export function checkEntry(levels, price, direction) {
-  const {
-    supportEntry,
-    resistanceEntry
-  } = levels;
+  const { supportEntry, resistanceEntry } = levels;
 
   if (direction === "up") {
-    // LONG quan el preu entra al marge superior del suport
+    // LONG quan el preu entra al marge del suport
     if (price <= supportEntry) return "long";
   }
 
   if (direction === "down") {
-    // SHORT quan el preu entra al marge inferior de la resistència
+    // SHORT quan el preu entra al marge de la resistència
     if (price >= resistanceEntry) return "short";
   }
 
   return null;
 }
+
