@@ -20,17 +20,11 @@ async function renderChannelsTable() {
     const candles = await getCandles(ch.symbol, "1H", 2);
     if (!candles.length) continue;
 
-    // candles[0] = vela ACTUAL (en formació)
-    // candles[1] = última vela tancada
     const current = candles[0];
-
-    // Preu actual FIAT‑NET (igual que TradingView)
     const price = current.close;
-
-    // Timestamp de la vela ACTUAL (igual que TradingView)
     const ts = current.timestamp;
 
-    // 🟩 Calculem suport/resistència amb la vela ACTUAL
+    // 🟩 Calculem nivells FIAT‑NET
     const levels = computeLevels(ch, ts);
 
     rows += `
@@ -38,10 +32,15 @@ async function renderChannelsTable() {
         <td>${ch.symbol}</td>
         <td>${ch.direction}</td>
         <td>${fmt(price)}</td>
+
         <td>${fmt(levels.support)}</td>
-        <td>${fmt(levels.supportMargin)}</td>
+        <td>${fmt(levels.supportEntry)}</td>
+        <td>${fmt(levels.supportSL)}</td>
+
         <td>${fmt(levels.resistance)}</td>
-        <td>${fmt(levels.resistanceMargin)}</td>
+        <td>${fmt(levels.resistanceEntry)}</td>
+        <td>${fmt(levels.resistanceSL)}</td>
+
         <td>${fmt(ch.width)}</td>
         <td>${fmt(ch.slope)}</td>
       </tr>
@@ -56,10 +55,15 @@ async function renderChannelsTable() {
           <th>Symbol</th>
           <th>Direcció</th>
           <th>Preu Actual</th>
+
           <th>Suport</th>
-          <th>Marge Suport</th>
+          <th>Entrada LONG</th>
+          <th>SL LONG</th>
+
           <th>Resistència</th>
-          <th>Marge Resistència</th>
+          <th>Entrada SHORT</th>
+          <th>SL SHORT</th>
+
           <th>Width</th>
           <th>Slope</th>
         </tr>
