@@ -27,21 +27,23 @@ async function processChannels() {
     const price = last.close;
     const currentTimestamp = last.timestamp;
 
-    // 2) CALCULAR NIVELLS ACTUALS
+    // 2) CALCULAR NIVELLS ACTUALS (FIAT‑NET)
     const levels = computeLevels(channel, currentTimestamp);
 
-    // 3) DETECTAR ENTRADA
+    // 3) DETECTAR ENTRADA (FIAT‑NET)
     const entry = checkEntry(levels, price, channel.direction);
     if (!entry) continue;
 
-    // 4) CALCULAR SL I TP
-    const sl = entry === "long"
-      ? levels.support - channel.width * 0.25
-      : levels.resistance + channel.width * 0.25;
+    // 4) CALCULAR SL I TP (FIAT‑NET)
+    let sl, tp;
 
-    const tp = entry === "long"
-      ? levels.resistance
-      : levels.support;
+    if (entry === "long") {
+      sl = levels.supportSL;       // per sota del marge del suport
+      tp = levels.resistance;      // línia de resistència
+    } else if (entry === "short") {
+      sl = levels.resistanceSL;    // per sobre del marge de resistència
+      tp = levels.support;         // línia de suport
+    }
 
     // 5) GUARDAR SENYAL
     await saveSignal({
@@ -67,6 +69,10 @@ TP: ${tp}
 
 Suport: ${levels.support}
 Resistència: ${levels.resistance}
+Entrada suport: ${levels.supportEntry}
+Entrada resistència: ${levels.resistanceEntry}
+SL suport: ${levels.supportSL}
+SL resistència: ${levels.resistanceSL}
     `);
 
     console.log(`🔥 Senyal enviada: ${symbol} ${entry}`);
@@ -82,4 +88,4 @@ cron.schedule("* * * * *", async () => {
   await processChannels();
 });
 
-console.log("🚀 FIAT‑NET Channels Bot en marxa (1H, cada minut)");
+console.log("🚀 FIAT‑NET Channels Bot en marxa (1H, canals + marges)");
