@@ -1,55 +1,53 @@
 // channels_utils.js
 
 // ------------------------------------------------------
-// Calcular suport/resistència actual + marges
+// Calcular suport/resistència + marges FIAT‑NET
 // ------------------------------------------------------
 export function computeLevels(channel, currentTimestamp, marginPercent = 0.15) {
-  const {
-    direction,
-    timestamp1,
-    price1,
-    slope,
-    width
-  } = channel;
+  const { direction, timestamp1, price1, slope, width } = channel;
 
+  // Línia base
   const base = price1 + slope * (currentTimestamp - timestamp1);
 
   let support, resistance;
 
   if (direction === "up") {
-    const top = base + width;
+    // Canal alcista
     support = base;
-    resistance = top;
+    resistance = base + width;
   } else {
-    const top = base + width;     // línia de dalt
-    const bottom = base;          // línia de baix
-    support = bottom;
-    resistance = top;
+    // Canal baixista
+    support = base;
+    resistance = base + width;
   }
 
+  // Marge FIAT‑NET
   const margin = width * marginPercent;
 
   return {
     support,
-    supportMargin: support - margin,
+    supportEntry: support + margin,   // entrada LONG
+    supportSL: support - margin,      // SL LONG
+
     resistance,
-    resistanceMargin: resistance + margin
+    resistanceEntry: resistance - margin, // entrada SHORT
+    resistanceSL: resistance + margin     // SL SHORT
   };
 }
 
 
 // ------------------------------------------------------
-// Detectar entrada al marge
+// Detectar entrada FIAT‑NET
 // ------------------------------------------------------
 export function checkEntry(levels, price, direction) {
-  const { supportMargin, resistanceMargin } = levels;
-
   if (direction === "up") {
-    if (price <= supportMargin) return "long";
+    // LONG quan entra al marge superior del suport
+    if (price <= levels.supportEntry) return "long";
   }
 
   if (direction === "down") {
-    if (price >= resistanceMargin) return "short";
+    // SHORT quan entra al marge inferior de la resistència
+    if (price >= levels.resistanceEntry) return "short";
   }
 
   return null;
