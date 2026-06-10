@@ -3,7 +3,7 @@
 // ------------------------------------------------------
 // Calcular suport/resistència + marges FIAT‑NET
 // ------------------------------------------------------
-export function computeLevels(channel, currentTimestamp, marginPercent = 0.15) {
+export function computeLevels(channel, currentTimestamp, marginPercent = 0.1) {
   const { direction, timestamp1, price1, slope, width } = channel;
 
   // Línia principal (P1 → P2) projectada a la vela ACTUAL
