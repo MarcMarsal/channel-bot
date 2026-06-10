@@ -21,6 +21,8 @@ async function renderChannelsTable() {
     if (!candles.length) continue;
 
     const current = candles[0];
+    console.log(ch.symbol, candles);
+
     const price = current.close;
     const ts = current.timestamp;
 
