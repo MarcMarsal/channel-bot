@@ -17,7 +17,7 @@ async function renderChannelsTable() {
   for (const ch of channels) {
 
     // 🟩 Demanem 2 veles per tenir la VELA ACTUAL (igual que TradingView)
-    const candles = await getCandles(ch.symbol, "1H", 2);
+    const candles = await getCandles(ch.symbol, "1H", 1);
     if (!candles.length) continue;
 
     const current = candles[0];
