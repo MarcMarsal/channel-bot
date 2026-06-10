@@ -12,24 +12,31 @@ export function computeLevels(channel, currentTimestamp, marginPercent = 0.15) {
     width
   } = channel;
 
-  // Línia base (suport en canal alcista, resistència en baixista)
   const base = price1 + slope * (currentTimestamp - timestamp1);
 
-  // Línia paral·lela
-  const parallel = direction === "up"
-    ? base + width
-    : base - width;
+  let support, resistance;
 
-  // Marges
+  if (direction === "up") {
+    const top = base + width;
+    support = base;
+    resistance = top;
+  } else {
+    const top = base + width;     // línia de dalt
+    const bottom = base;          // línia de baix
+    support = bottom;
+    resistance = top;
+  }
+
   const margin = width * marginPercent;
 
   return {
-    support: direction === "up" ? base : parallel,
-    supportMargin: direction === "up" ? base - margin : parallel - margin,
-    resistance: direction === "up" ? parallel : base,
-    resistanceMargin: direction === "up" ? parallel + margin : base + margin
+    support,
+    supportMargin: support - margin,
+    resistance,
+    resistanceMargin: resistance + margin
   };
 }
+
 
 // ------------------------------------------------------
 // Detectar entrada al marge
