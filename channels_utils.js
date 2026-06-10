@@ -6,18 +6,24 @@
 export function computeLevels(channel, currentTimestamp, marginPercent = 0.15) {
   const { direction, timestamp1, price1, slope, width } = channel;
 
-  const base = price1 + slope * (currentTimestamp - timestamp1);
+  // Línia principal definida per P1 → P2
+  const dt = currentTimestamp - timestamp1;
+  const mainLine = price1 + slope * dt;
 
   let support, resistance;
 
-  if (direction === "up") {
-    // Canal alcista: base = suport
-    support = base;
-    resistance = base + width;
+  if (direction === "down") {
+    // Canal baixista:
+    // - línia principal = resistència
+    // - línia clonada = suport
+    resistance = mainLine;
+    support = mainLine - width;
   } else {
-    // Canal baixista: base = resistència
-    resistance = base;
-    support = base - width;
+    // Canal alcista:
+    // - línia principal = suport
+    // - línia clonada = resistència
+    support = mainLine;
+    resistance = mainLine + width;
   }
 
   const margin = width * marginPercent;
@@ -31,6 +37,7 @@ export function computeLevels(channel, currentTimestamp, marginPercent = 0.15) {
     resistanceSL: resistance + margin
   };
 }
+
 
 
 // ------------------------------------------------------
