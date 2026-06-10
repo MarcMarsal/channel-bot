@@ -1,7 +1,7 @@
 // bot_channels_viewer.js — FIAT‑NET (sense Express)
 
 import http from "http";
-import { initDB, client } from "./db/client.js";
+import { initDB } from "./db/client.js";
 import { computeLevels } from "./channels_utils.js";
 import { getActiveChannels, getLastSignals, getCandles } from "./channels_db.js";
 
@@ -15,13 +15,22 @@ async function renderChannelsTable() {
   let rows = "";
 
   for (const ch of channels) {
-    const candles = await getCandles(ch.symbol, "1H", 1);
+
+    // 🟩 Demanem 2 veles per tenir la VELA ACTUAL (igual que TradingView)
+    const candles = await getCandles(ch.symbol, "1H", 2);
     if (!candles.length) continue;
 
-    const last = candles[0];
-    const price = last.close;
-    const ts = last.timestamp;
+    // candles[0] = vela ACTUAL (en formació)
+    // candles[1] = última vela tancada
+    const current = candles[0];
 
+    // Preu actual FIAT‑NET (igual que TradingView)
+    const price = current.close;
+
+    // Timestamp de la vela ACTUAL (igual que TradingView)
+    const ts = current.timestamp;
+
+    // 🟩 Calculem suport/resistència amb la vela ACTUAL
     const levels = computeLevels(ch, ts);
 
     rows += `
