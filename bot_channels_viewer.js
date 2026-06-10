@@ -1,110 +1,165 @@
-// bot_channels_viewer.js
-import express from "express";
-import { getActiveChannels, getLastSignals, getCandles } from "./channels_db.js";
+// bot_channels_viewer.js — FIAT‑NET (sense Express)
+
+import http from "http";
+import { initDB, client } from "./db/client.js";
 import { computeLevels } from "./channels_utils.js";
+import { getActiveChannels, getLastSignals, getCandles } from "./channels_db.js";
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+// Formatador numèric FIAT
+function fmt(n) {
+  return n !== null && n !== undefined ? Number(n).toFixed(4) : "-";
+}
 
-// ------------------------------------------------------
-// GET /channels → estat actual dels canals
-// ------------------------------------------------------
-app.get("/channels", async (req, res) => {
-  try {
-    const channels = await getActiveChannels();
-    const result = [];
+async function renderChannelsTable() {
+  const channels = await getActiveChannels();
+  let rows = "";
 
-    for (const ch of channels) {
-      const candles = await getCandles(ch.symbol, "1H", 1);
-      if (!candles.length) continue;
+  for (const ch of channels) {
+    const candles = await getCandles(ch.symbol, "1H", 1);
+    if (!candles.length) continue;
 
-      const last = candles[0];
-      const price = last.close;
-      const ts = last.timestamp;
+    const last = candles[0];
+    const price = last.close;
+    const ts = last.timestamp;
 
-      const levels = computeLevels(ch, ts);
+    const levels = computeLevels(ch, ts);
 
-      result.push({
-        symbol: ch.symbol,
-        direction: ch.direction,
-        price,
-        support: levels.support,
-        resistance: levels.resistance,
-        supportMargin: levels.supportMargin,
-        resistanceMargin: levels.resistanceMargin,
-        width: ch.width,
-        slope: ch.slope,
-        timestamp: ts
-      });
+    rows += `
+      <tr>
+        <td>${ch.symbol}</td>
+        <td>${ch.direction}</td>
+        <td>${fmt(price)}</td>
+        <td>${fmt(levels.support)}</td>
+        <td>${fmt(levels.resistance)}</td>
+        <td>${fmt(levels.supportMargin)}</td>
+        <td>${fmt(levels.resistanceMargin)}</td>
+        <td>${fmt(ch.width)}</td>
+        <td>${fmt(ch.slope)}</td>
+      </tr>
+    `;
+  }
+
+  return `
+    <h2>Canals Actius</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Direcció</th>
+          <th>Preu</th>
+          <th>Suport</th>
+          <th>Resistència</th>
+          <th>Suport M.</th>
+          <th>Resistència M.</th>
+          <th>Width</th>
+          <th>Slope</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+async function renderSignalsTable() {
+  const signals = await getLastSignals(20);
+  let rows = "";
+
+  for (const s of signals) {
+    rows += `
+      <tr>
+        <td>${s.id}</td>
+        <td>${s.symbol}</td>
+        <td>${s.timeframe}</td>
+        <td>${s.type}</td>
+        <td>${fmt(s.entry)}</td>
+        <td>${fmt(s.tp)}</td>
+        <td>${fmt(s.sl)}</td>
+        <td>${new Date(s.created_at).toLocaleString("es-ES")}</td>
+      </tr>
+    `;
+  }
+
+  return `
+    <h2>Últimes 20 Senyals</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Symbol</th>
+          <th>TF</th>
+          <th>Tipus</th>
+          <th>Entrada</th>
+          <th>TP</th>
+          <th>SL</th>
+          <th>Creat</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+async function startPanel() {
+  await initDB();
+
+  http.createServer(async (req, res) => {
+    if (req.url === "/") {
+      const channelsHTML = await renderChannelsTable();
+      const signalsHTML = await renderSignalsTable();
+      const lastUpdate = new Date().toLocaleString("es-ES");
+
+      const html = `
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="refresh" content="5">
+        <style>
+          body {
+            background-color: #000;
+            color: #00ff00;
+            font-family: Consolas, monospace;
+            padding: 20px;
+          }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 40px;
+          }
+          th, td {
+            border: 1px solid #00ff00;
+            padding: 6px;
+            text-align: center;
+          }
+          th {
+            background-color: #003300;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Panell FIAT‑NET Channels</h1>
+        <p><b>Última actualització:</b> ${lastUpdate}</p>
+
+        ${channelsHTML}
+        ${signalsHTML}
+
+      </body>
+      </html>
+      `;
+
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      res.end(html);
+      return;
     }
 
-    res.json(result);
-  } catch (err) {
-    console.error("Error /channels:", err);
-    res.status(500).json({ error: "Error obtenint canals" });
-  }
-});
+    res.writeHead(200);
+    res.end("Panell FIAT‑NET Channels OK");
+  }).listen(process.env.PORT || 3000);
 
-// ------------------------------------------------------
-// GET /signals → últimes 20 senyals
-// ------------------------------------------------------
-app.get("/signals", async (req, res) => {
-  try {
-    const signals = await getLastSignals(20);
-    res.json(signals);
-  } catch (err) {
-    console.error("Error /signals:", err);
-    res.status(500).json({ error: "Error obtenint senyals" });
-  }
-});
+  console.log("📡 Panell FIAT‑NET Channels en marxa");
+}
 
-// ------------------------------------------------------
-// GET / → resum complet
-// ------------------------------------------------------
-app.get("/", async (req, res) => {
-  try {
-    const channels = await getActiveChannels();
-    const signals = await getLastSignals(20);
-
-    const channelsState = [];
-
-    for (const ch of channels) {
-      const candles = await getCandles(ch.symbol, "1H", 1);
-      if (!candles.length) continue;
-
-      const last = candles[0];
-      const price = last.close;
-      const ts = last.timestamp;
-
-      const levels = computeLevels(ch, ts);
-
-      channelsState.push({
-        symbol: ch.symbol,
-        direction: ch.direction,
-        price,
-        support: levels.support,
-        resistance: levels.resistance,
-        supportMargin: levels.supportMargin,
-        resistanceMargin: levels.resistanceMargin,
-        width: ch.width,
-        slope: ch.slope,
-        timestamp: ts
-      });
-    }
-
-    res.json({
-      channels: channelsState,
-      lastSignals: signals
-    });
-  } catch (err) {
-    console.error("Error /:", err);
-    res.status(500).json({ error: "Error obtenint dades" });
-  }
-});
-
-// ------------------------------------------------------
-// START SERVER
-// ------------------------------------------------------
-app.listen(PORT, () => {
-  console.log(`📡 Viewer Channels Bot escoltant al port ${PORT}`);
-});
+startPanel();
