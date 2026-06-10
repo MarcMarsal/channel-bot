@@ -30,8 +30,8 @@ async function renderChannelsTable() {
         <td>${ch.direction}</td>
         <td>${fmt(price)}</td>
         <td>${fmt(levels.support)}</td>
-        <td>${fmt(levels.resistance)}</td>
         <td>${fmt(levels.supportMargin)}</td>
+        <td>${fmt(levels.resistance)}</td>
         <td>${fmt(levels.resistanceMargin)}</td>
         <td>${fmt(ch.width)}</td>
         <td>${fmt(ch.slope)}</td>
@@ -46,11 +46,11 @@ async function renderChannelsTable() {
         <tr>
           <th>Symbol</th>
           <th>Direcció</th>
-          <th>Preu</th>
+          <th>Preu Actual</th>
           <th>Suport</th>
+          <th>Marge Suport</th>
           <th>Resistència</th>
-          <th>Suport M.</th>
-          <th>Resistència M.</th>
+          <th>Marge Resistència</th>
           <th>Width</th>
           <th>Slope</th>
         </tr>
