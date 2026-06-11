@@ -59,7 +59,7 @@ async function processChannels() {
     });
 
     // 6) ENVIAR TELEGRAM
-    await sendTelegram(`
+    const msg = `
 <b>${symbol}</b>
 Canal: ${channel.direction.toUpperCase()}
 Entrada: <b>${entry.toUpperCase()}</b>
@@ -74,7 +74,12 @@ Entrada suport: ${levels.supportEntry}
 Entrada resistència: ${levels.resistanceEntry}
 SL suport: ${levels.supportSL}
 SL resistència: ${levels.resistanceSL}
-    `);
+`;
+
+console.log("📤 MISSATGE A ENVIAR:", msg);
+
+await sendTelegram(msg);
+
 
     console.log(`🔥 Senyal enviada: ${symbol} ${entry}`);
   }
