@@ -20,7 +20,7 @@ async function processChannels() {
 
     // 1) OBTENIR L'ÚLTIMA VELA OBERTA DE LA BD
     const candles = await getCandles(symbol, "1H", 1);
-    console.log("Candles:", candles);
+    //console.log("Candles:", candles);
     if (!candles.length) continue;
 
     const last = candles[0];
@@ -29,7 +29,7 @@ async function processChannels() {
 
     // 2) CALCULAR NIVELLS ACTUALS (FIAT‑NET)
     const levels = computeLevels(channel, currentTimestamp);
-    console.log("Channel:", channel);
+    //console.log("Channel:", channel);
 
     // 3) DETECTAR ENTRADA (FIAT‑NET)
     const entry = checkEntry(levels, price, channel.direction);
