@@ -33,7 +33,11 @@ async function processChannels() {
 
     // 3) DETECTAR ENTRADA (FIAT‑NET)
     const entry = checkEntry(levels, price, channel.direction);
-    if (!entry) continue;
+    // Només LONG o SHORT generen senyal real
+    if (entry !== "long" && entry !== "short") {
+      continue;
+    }
+
 
     // 4) CALCULAR SL I TP
     let sl, tp;
