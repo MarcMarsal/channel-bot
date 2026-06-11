@@ -43,19 +43,32 @@ export function computeLevels(channel, currentTimestamp, marginPercent = 0.2) {
 // Mean Reversion FIAT‑NET: LONG al suport, SHORT a la resistència
 // independentment de la direcció del canal
 // ------------------------------------------------------
-export function checkEntry(levels, pricePrev, priceNow) {
-  const { supportEntry, resistanceEntry } = levels;
+export function checkEntry(levels, price, nearPercent = 0.1) {
+  const { supportEntry, resistanceEntry, support, resistance } = levels;
 
-  // LONG → creuament cap avall del suportEntry
-  if (pricePrev > supportEntry && priceNow <= supportEntry) {
+  const width = resistance - support;
+  const nearDist = width * nearPercent;
+
+  // 1) ZONA DE LONG
+  if (price <= supportEntry) {
     return "long";
   }
 
-  // SHORT → creuament cap amunt de la resistanceEntry
-  if (pricePrev < resistanceEntry && priceNow >= resistanceEntry) {
+  // 2) ZONA DE SHORT
+  if (price >= resistanceEntry) {
     return "short";
   }
 
-  return null;
-}
+  // 3) MOLT A PROP DE LONG
+  if (price > supportEntry && price <= supportEntry + nearDist) {
+    return "molt a prop de long";
+  }
 
+  // 4) MOLT A PROP DE SHORT
+  if (price < resistanceEntry && price >= resistanceEntry - nearDist) {
+    return "molt a prop de short";
+  }
+
+  // 5) LLUNY
+  return "esperant";
+}
