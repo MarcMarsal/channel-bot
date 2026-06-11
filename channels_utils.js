@@ -48,9 +48,9 @@ export function checkEntry(levels, price, direction) {
   if (direction === "up") {
     if (price <= supportEntry) return "long";
   }
-
+  console.log(direction, price, resistanceEntry);
   if (direction === "down") {
-    console.log(price, resistanceEntry);
+    
     if (price >= resistanceEntry) return "short";
   }
 
