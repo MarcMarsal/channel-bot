@@ -3,29 +3,27 @@
 // ------------------------------------------------------
 // Calcular suport/resistència + marges FIAT‑NET
 // ------------------------------------------------------
-export function computeLevels(channel, currentTimestamp, marginPercent = 0.1) {
+export function computeLevels(channel, currentTimestamp, marginPercent = 0.2) {
   const { direction, timestamp1, price1, slope, width } = channel;
 
-  // Línia principal (P1 → P2) projectada a la vela ACTUAL
-  const dt = currentTimestamp - timestamp1;
-  const mainLine = price1 + slope * dt;
+  // 1) Convertir timestamps → índex de vela (TF 1H = 3600000 ms)
+  const index = (currentTimestamp - timestamp1) / 3600000;
 
+  // 2) Projectar línia principal amb slope per vela
+  const mainLine = price1 + slope * index;
+
+  // 3) Suport / Resistència segons direcció
   let support, resistance;
 
   if (direction === "down") {
-    // Canal baixista:
-    // - línia principal = resistència
-    // - clon = suport
     resistance = mainLine;
     support = mainLine - width;
   } else {
-    // Canal alcista:
-    // - línia principal = suport
-    // - clon = resistència
     support = mainLine;
     resistance = mainLine + width;
   }
 
+  // 4) Marges FIAT‑NET (20% del width)
   const margin = width * marginPercent;
 
   return {
@@ -37,7 +35,6 @@ export function computeLevels(channel, currentTimestamp, marginPercent = 0.1) {
     resistanceSL: resistance + margin
   };
 }
-
 
 // ------------------------------------------------------
 // Detectar entrada FIAT‑NET (canal + marges)
