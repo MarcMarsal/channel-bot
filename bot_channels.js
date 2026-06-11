@@ -21,6 +21,7 @@ async function processChannels() {
 
     // 1) OBTENIR L'ÚLTIMA VELA OBERTA DE LA BD
     const candles = await getCandles(symbol, "1H", 1);
+    console.log(candles);
     if (!candles.length) continue;
 
     const last = candles[0];
