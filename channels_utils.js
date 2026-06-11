@@ -3,9 +3,6 @@
 // ------------------------------------------------------
 // Calcular suport/resistència + marges FIAT‑NET
 // ------------------------------------------------------
-// ------------------------------------------------------
-// Calcular suport/resistència + marges FIAT‑NET
-// ------------------------------------------------------
 export function computeLevels(channel, currentTimestamp, marginPercent = 0.2) {
   const { direction, timestamp1, price1, slope, width } = channel;
 
@@ -42,21 +39,23 @@ export function computeLevels(channel, currentTimestamp, marginPercent = 0.2) {
   };
 }
 
-
 // ------------------------------------------------------
-// Detectar entrada FIAT‑NET (canal + marges)
+// Mean Reversion FIAT‑NET: LONG al suport, SHORT a la resistència
+// independentment de la direcció del canal
 // ------------------------------------------------------
-export function checkEntry(levels, price, direction) {
+export function checkEntry(levels, pricePrev, priceNow) {
   const { supportEntry, resistanceEntry } = levels;
 
-  if (direction === "up") {
-    if (price <= supportEntry) return "long";
+  // LONG → creuament cap avall del suportEntry
+  if (pricePrev > supportEntry && priceNow <= supportEntry) {
+    return "long";
   }
-  //console.log(direction, price, resistanceEntry);
-  if (direction === "down") {
-    
-    if (price >= resistanceEntry) return "short";
+
+  // SHORT → creuament cap amunt de la resistanceEntry
+  if (pricePrev < resistanceEntry && priceNow >= resistanceEntry) {
+    return "short";
   }
 
   return null;
 }
+
