@@ -8,7 +8,7 @@ import { sendTelegram } from "./telegram/send.js";
 // PROCESSAR CANALS
 // ---------------------------------------------
 async function processChannels() {
-  console.log("⏳ Processant canals...");
+  //console.log("⏳ Processant canals...");
 
   const channels = await getActiveChannels();
   if (!channels.length) {
