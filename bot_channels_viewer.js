@@ -2,7 +2,7 @@
 
 import http from "http";
 import { initDB } from "./db/client.js";
-import { computeLevels } from "./channels_utils.js";
+import { computeLevels, checkEntry } from "./channels_utils.js";
 import { getActiveChannels, getLastSignals, getCandles } from "./channels_db.js";
 
 // Formatador numèric FIAT
@@ -16,18 +16,19 @@ async function renderChannelsTable() {
 
   for (const ch of channels) {
 
-    // 🟩 Demanem 2 veles per tenir la VELA ACTUAL (igual que TradingView)
+    // 🟩 Demanem 1 vela (preu actual)
     const candles = await getCandles(ch.symbol, "1H", 1);
     if (!candles.length) continue;
 
     const current = candles[0];
-    //console.log(ch.symbol, candles);
-
     const price = current.close;
     const ts = current.timestamp;
 
     // 🟩 Calculem nivells FIAT‑NET
     const levels = computeLevels(ch, ts);
+
+    // 🟩 Calculem estat FIAT‑NET (long, short, molt a prop, esperant)
+    const state = checkEntry(levels, price);
 
     rows += `
       <tr>
@@ -45,6 +46,8 @@ async function renderChannelsTable() {
 
         <td>${fmt(ch.width)}</td>
         <td>${fmt(ch.slope)}</td>
+
+        <td>${state}</td>
       </tr>
     `;
   }
@@ -68,6 +71,8 @@ async function renderChannelsTable() {
 
           <th>Width</th>
           <th>Slope</th>
+
+          <th>Estat</th>
         </tr>
       </thead>
       <tbody>
