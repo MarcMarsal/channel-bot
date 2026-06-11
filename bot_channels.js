@@ -29,7 +29,7 @@ async function processChannels() {
 
     // 2) CALCULAR NIVELLS ACTUALS (FIAT‑NET)
     const levels = computeLevels(channel, currentTimestamp);
-
+console.log(channel);
     // 3) DETECTAR ENTRADA (FIAT‑NET)
     const entry = checkEntry(levels, price, channel.direction);
     if (!entry) continue;
