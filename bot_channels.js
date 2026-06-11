@@ -20,7 +20,6 @@ async function processChannels() {
 
     // 1) OBTENIR L'ÚLTIMA VELA OBERTA DE LA BD
     const candles = await getCandles(symbol, "1H", 1);
-    //console.log("Candles:", candles);
     if (!candles.length) continue;
 
     const last = candles[0];
@@ -29,15 +28,14 @@ async function processChannels() {
 
     // 2) CALCULAR NIVELLS ACTUALS (FIAT‑NET)
     const levels = computeLevels(channel, currentTimestamp);
-    //console.log("Channel:", channel);
 
-    // 3) DETECTAR ENTRADA (FIAT‑NET)
-    const entry = checkEntry(levels, price, channel.direction);
+    // 3) DETECTAR ESTAT (FIAT‑NET)
+    const entry = checkEntry(levels, price);   // ❗ direction eliminat
+
     // Només LONG o SHORT generen senyal real
     if (entry !== "long" && entry !== "short") {
       continue;
     }
-
 
     // 4) CALCULAR SL I TP
     let sl, tp;
@@ -80,10 +78,8 @@ SL suport: ${levels.supportSL}
 SL resistència: ${levels.resistanceSL}
 `;
 
-console.log("📤 MISSATGE A ENVIAR:", msg);
-
-await sendTelegram(msg);
-
+    console.log("📤 MISSATGE A ENVIAR:", msg);
+    await sendTelegram(msg);
 
     console.log(`🔥 Senyal enviada: ${symbol} ${entry}`);
   }
@@ -92,7 +88,7 @@ await sendTelegram(msg);
 }
 
 // -------------------------------------------------------------
-// START BOT (igual que upgraded)
+// START BOT
 // -------------------------------------------------------------
 async function startBot() {
   await initDB();
