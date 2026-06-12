@@ -3,7 +3,7 @@
 import http from "http";
 import { initDB } from "./db/client.js";
 import { computeLevels, checkEntry } from "./channels_utils.js";
-import { getActiveChannels, getLastSignals, getCandles } from "./channels_db.js";
+import { getActiveChannels, getCandles } from "./channels_db.js";
 
 // Formatador numèric FIAT
 function fmt(n) {
@@ -54,6 +54,12 @@ async function renderChannelsTable() {
 
   return `
     <h2>Canals Actius</h2>
+
+    <label style="font-size:18px;">
+      <input type="checkbox" id="filterEntries">
+      Mostrar només LONG / SHORT
+    </label>
+
     <table>
       <thead>
         <tr>
@@ -75,48 +81,7 @@ async function renderChannelsTable() {
           <th>Estat</th>
         </tr>
       </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `;
-}
-
-async function renderSignalsTable() {
-  const signals = await getLastSignals(20);
-  let rows = "";
-
-  for (const s of signals) {
-    rows += `
-      <tr>
-        <td>${s.id}</td>
-        <td>${s.symbol}</td>
-        <td>${s.timeframe}</td>
-        <td>${s.type}</td>
-        <td>${fmt(s.entry)}</td>
-        <td>${fmt(s.tp)}</td>
-        <td>${fmt(s.sl)}</td>
-        <td>${new Date(s.created_at).toLocaleString("es-ES")}</td>
-      </tr>
-    `;
-  }
-
-  return `
-    <h2>Últimes 20 Senyals</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Symbol</th>
-          <th>TF</th>
-          <th>Tipus</th>
-          <th>Entrada</th>
-          <th>TP</th>
-          <th>SL</th>
-          <th>Creat</th>
-        </tr>
-      </thead>
-      <tbody>
+      <tbody id="channelsBody">
         ${rows}
       </tbody>
     </table>
@@ -129,7 +94,6 @@ async function startPanel() {
   http.createServer(async (req, res) => {
     if (req.url === "/") {
       const channelsHTML = await renderChannelsTable();
-      const signalsHTML = await renderSignalsTable();
       const lastUpdate = new Date().toLocaleString("es-ES");
 
       const html = `
@@ -147,7 +111,7 @@ async function startPanel() {
           table {
             border-collapse: collapse;
             width: 100%;
-            margin-bottom: 40px;
+            margin-top: 20px;
           }
           th, td {
             border: 1px solid #00ff00;
@@ -164,7 +128,29 @@ async function startPanel() {
         <p><b>Última actualització:</b> ${lastUpdate}</p>
 
         ${channelsHTML}
-        ${signalsHTML}
+
+        <script>
+          function applyFilter() {
+            const onlyEntries = document.getElementById("filterEntries").checked;
+            const rows = document.querySelectorAll("#channelsBody tr");
+
+            rows.forEach(row => {
+              const state = row.cells[row.cells.length - 1].innerText.trim().toLowerCase();
+              const isEntry = state === "long" || state === "short";
+
+              row.style.display = onlyEntries && !isEntry ? "none" : "";
+            });
+          }
+
+          // Quan es clica el checkbox
+          document.addEventListener("DOMContentLoaded", () => {
+            const cb = document.getElementById("filterEntries");
+            if (cb) cb.addEventListener("change", applyFilter);
+          });
+
+          // Reaplica el filtre després de cada refresc
+          setInterval(applyFilter, 1000);
+        </script>
 
       </body>
       </html>
