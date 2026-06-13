@@ -29,9 +29,12 @@ export function computeLevels(channel, currentTimestamp, marginPercent = 0.2) {
   // 4) Marges FIAT‑NET (20% del width)
   const margin = width * marginPercent;
 
+  const midline = (support + resistance) / 2;
+
   return {
     support,
     resistance,
+    midline,
     supportEntry: support + margin,
     resistanceEntry: resistance - margin,
     supportSL: support - margin,
