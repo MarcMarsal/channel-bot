@@ -44,6 +44,8 @@ async function renderChannelsTable() {
         <td>${fmt(levels.resistanceEntry)}</td>
         <td>${fmt(levels.resistanceSL)}</td>
 
+        <td>${fmt(levels.midline)}</td>   <!-- 🟩 NOVA COLUMNA -->
+
         <td>${fmt(ch.width)}</td>
         <td>${fmt(ch.slope)}</td>
 
@@ -75,6 +77,8 @@ async function renderChannelsTable() {
           <th>Entrada SHORT</th>
           <th>SL SHORT</th>
 
+          <th>Midline (TP)</th>   <!-- 🟩 NOVA COLUMNA -->
+
           <th>Width</th>
           <th>Slope</th>
 
@@ -87,6 +91,7 @@ async function renderChannelsTable() {
     </table>
   `;
 }
+
 
 async function startPanel() {
   await initDB();
