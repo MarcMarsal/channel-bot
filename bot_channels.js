@@ -79,7 +79,7 @@ SL resistència: ${levels.resistanceSL}
 `;
 
     console.log("📤 MISSATGE A ENVIAR:", msg);
-    await sendTelegram(msg);
+    //await sendTelegram(msg);
 
     console.log(`🔥 Senyal enviada: ${symbol} ${entry}`);
   }
